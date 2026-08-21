@@ -1428,6 +1428,11 @@ a:active  { color: blue; }   <span class="c">/* being clicked, right now */</spa
       <h2 class="topic-title">15 · JavaScript basics</h2>
       <p class="lede">JavaScript adds behavior and interactivity to a web page — things HTML and CSS alone can't do, like reacting to a click or validating a form before it's submitted.</p>
 
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled — what JavaScript actually is</div>
+        <p>JavaScript is a lightweight, <dfn>interpreted</dfn> language (run line-by-line by the browser, like Python — not compiled ahead of time) and <dfn>dynamic</dfn> (variable types are figured out at runtime, not declared upfront). It was originally named <strong>LiveScript</strong>; the rename to "JavaScript" was a marketing decision to ride on Java's popularity at the time — the two languages are otherwise unrelated, despite the similar name. In a Django project, JavaScript's main job is <strong>client-side validation</strong>: catching obviously-bad form input in the browser, before it's ever sent to the server (HTML provides structure, CSS provides styling, JavaScript provides behavior).</p>
+      </div>
+
       <h3>Where JavaScript code lives</h3>
       <p>Like CSS, JavaScript can be internal (inside a <span class="kbd">&lt;script&gt;</span> tag on the page) or external (a separate <span class="kbd">.js</span> file, linked in).</p>
       <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html"><span class="c">&lt;!-- internal --&gt;</span>
@@ -1438,6 +1443,20 @@ a:active  { color: blue; }   <span class="c">/* being clicked, right now */</spa
 <span class="c">&lt;!-- external --&gt;</span>
 &lt;script src="script.js"&gt;&lt;/script&gt;</pre></div>
       <div class="code-note">Convention: place <span class="kbd">&lt;script&gt;</span> tags in the <span class="kbd">&lt;head&gt;</span>, same as CSS <span class="kbd">&lt;link&gt;</span> tags — though for scripts that manipulate content on the page, placing them at the end of <span class="kbd">&lt;body&gt;</span> is also common so the HTML loads first.</div>
+
+      <p><span class="kbd">src</span> on <span class="kbd">&lt;script&gt;</span> works exactly like <span class="kbd">href</span> did for a CSS <span class="kbd">&lt;link&gt;</span> — it points to the external file. Unlike the CSS <span class="kbd">rel</span> attribute, though, the <span class="kbd">type="text/javascript"</span> attribute really is optional here: modern HTML defaults <span class="kbd">&lt;script&gt;</span> to JavaScript, so omitting <span class="kbd">type</span> works correctly in every current browser.</p>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>Inside a Django project, create an external JavaScript file the same way as an HTML template or a CSS file: in the <span class="kbd">templates</span> folder, right-click → <em>New</em> → <em>JavaScript File</em>, name it (e.g. <span class="kbd">sample.js</span>). Link it into a page with <span class="kbd">&lt;script src="sample.js"&gt;&lt;/script&gt;</span>.</p>
+      </div>
+
+      <h3>Comments</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="javascript"><span class="c">// single-line comment</span>
+
+<span class="c">/* multi-line
+   comment */</span></pre></div>
+      <p>Same purpose as HTML comments: notes for whoever reads the code later. The JavaScript interpreter skips comments entirely — they have no effect on how the script runs.</p>
 
       <h3>Displaying output — and which method to actually use</h3>
       <div class="table-scroll"><table class="ref">
@@ -1463,6 +1482,19 @@ let b = Number(prompt("Enter second number"));
 console.log("Sum is " + (a + b));</pre></div>
       <p><span class="kbd">prompt()</span> is JavaScript's equivalent of Python's <span class="kbd">input()</span> — but everything it returns is always text. That's why <span class="kbd">Number(...)</span> wraps it above: without converting, <span class="kbd">"10" + "20"</span> would produce the text <span class="kbd">"1020"</span> (stuck together) instead of adding to <span class="kbd">30</span>.</p>
 
+      <div class="callout example">
+        <div class="callout-label">Example — even/odd checker</div>
+        <p>Combining a runtime-entered number with an <span class="kbd">if</span>/<span class="kbd">else</span> and the remainder operator <span class="kbd">%</span>:</p>
+        <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="javascript">let n = Number(prompt("Enter any number"));
+
+if (n % 2 == 0) {
+    console.log(n + " is even");
+} else {
+    console.log(n + " is odd");
+}</pre></div>
+        <p><span class="kbd">%</span> gives the remainder of a division — <span class="kbd">n % 2</span> is <span class="kbd">0</span> for any even number and <span class="kbd">1</span> for any odd number, which is exactly what the condition checks. Input <span class="kbd">7</span> → output <span class="kbd">"7 is odd"</span>; input <span class="kbd">10</span> → output <span class="kbd">"10 is even"</span>.</p>
+      </div>
+
       <div class="callout gapfill">
         <div class="callout-label">Gap‑filled — var vs. let vs. const</div>
         <p>The video only ever declares variables with <span class="kbd">var</span>. Modern JavaScript (since 2015) prefers <span class="kbd">let</span> (for values that change) and <span class="kbd">const</span> (for values that never get reassigned). <span class="kbd">var</span> has looser, more error-prone scoping rules that <span class="kbd">let</span>/<span class="kbd">const</span> were introduced specifically to fix. Current style guides, including MDN's, recommend avoiding <span class="kbd">var</span> in new code — that's why every example on this page uses <span class="kbd">let</span> instead.</p>
@@ -1474,6 +1506,17 @@ console.log("Sum is " + (a + b));</pre></div>
       <div class="topic-eyebrow"><span class="session-chip">Session 9–10</span>Front-end foundations</div>
       <h2 class="topic-title">16 · DOM manipulation &amp; form validation</h2>
       <p class="lede">JavaScript can reach into a loaded page and change it (DOM manipulation), and it's most commonly used in forms to catch bad input before it's ever sent to the server.</p>
+
+      <h3>Functions &amp; the <span class="kbd">onclick</span> event</h3>
+      <p>A <dfn>function</dfn> is a named, reusable block of code — write it once, then run it whenever you need to by calling its name. In the browser, functions are commonly triggered by <dfn>events</dfn>: something the user does, like clicking a button.</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;script&gt;
+function sayHello() {
+    alert("Hello!");
+}
+&lt;/script&gt;
+
+&lt;input type="button" value="Click here" onclick="sayHello()"&gt;</pre></div>
+      <p><span class="kbd">function sayHello() { ... }</span> defines the function but doesn't run it — nothing happens until it's called. <span class="kbd">onclick="sayHello()"</span> on the button is that call: it wires up the click event so the function runs each time the button is clicked. Unlike Python, JavaScript doesn't use indentation to mark a function's body — the curly braces <span class="kbd">{ }</span> do that job.</p>
 
       <h3>What "DOM" means</h3>
       <p>The <dfn>DOM</dfn> (Document Object Model) is the browser's live, in-memory representation of your HTML page — a structure JavaScript can read and change after the page has loaded, and the browser instantly reflects those changes on screen.</p>
@@ -1507,7 +1550,7 @@ function validateForm() {
     return true; <span class="c">// only now does the form actually submit</span>
 }
 &lt;/script&gt;</pre></div>
-      <p>The key mechanic: <span class="kbd">onsubmit="return validateForm()"</span>. If <span class="kbd">validateForm()</span> returns <span class="kbd">false</span>, the browser cancels the submission entirely — the form never leaves the page. If it returns <span class="kbd">true</span>, submission proceeds normally.</p>
+      <p>The key mechanic: <span class="kbd">onsubmit="return validateForm()"</span>. If <span class="kbd">validateForm()</span> returns <span class="kbd">false</span>, the browser cancels the submission entirely — the form never leaves the page. If it returns <span class="kbd">true</span>, submission proceeds normally — to wherever the form's <span class="kbd">action</span> attribute points (e.g. <span class="kbd">&lt;form action="https://example.com" ...&gt;</span> would send the browser there once validation passes).</p>
 
       <h3>Matching two password fields</h3>
       <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="javascript">function matchPwd() {
@@ -1533,7 +1576,8 @@ function validateForm() {
       <p class="lede">jQuery is a JavaScript library that lets you write much shorter code for common tasks like selecting elements and handling clicks — its own slogan is "write less, do more."</p>
 
       <h3>What it is</h3>
-      <p>A <dfn>library</dfn> is a pre-written bundle of code you can call into, instead of writing everything from scratch. jQuery specifically wraps a lot of common, repetitive JavaScript (selecting elements, showing/hiding things, handling events) into short one-line methods.</p>
+      <p>A <dfn>library</dfn> is a pre-written bundle of code you can call into, instead of writing everything from scratch. jQuery specifically wraps a lot of common, repetitive JavaScript (selecting elements, showing/hiding things, handling events, and <dfn>AJAX</dfn> — Asynchronous JavaScript and XML, i.e. fetching data from a server without reloading the page) into short one-line methods.</p>
+      <p>jQuery was created by John Resig in 2006. Its main selling points at the time: it's small and fast, and it smooths over inconsistencies between browsers — the same jQuery code reliably works the same way across Chrome, Firefox, Edge, etc., which plain JavaScript of that era often didn't.</p>
 
       <h3>Adding jQuery to a page: two ways</h3>
       <div class="table-scroll"><table class="ref">
@@ -1546,6 +1590,17 @@ function validateForm() {
 
 <span class="c">&lt;!-- CDN --&gt;</span>
 &lt;script src="https://code.jquery.com/jquery-3.6.0.min.js"&gt;&lt;/script&gt;</pre></div>
+      <p>jquery.com offers each release as either <strong>compressed/production</strong> (the <span class="kbd">.min.js</span> file — all whitespace and comments stripped, so it's one dense unreadable line, but small and fast to download) or <strong>uncompressed/development</strong> (the same code, readably formatted, larger). For a real site, use the minified build; the unminified one is only useful if you ever need to read jQuery's own source.</p>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>For the local option, the downloaded <span class="kbd">jquery-3.6.0.min.js</span> file goes wherever your other static files live — in this project, the <span class="kbd">templates</span> folder, alongside your CSS/JS files, added via the same right-click → <em>New</em> workflow (or copy-pasted in directly, since it's downloaded rather than authored). Then link it with a normal <span class="kbd">&lt;script src="jquery-3.6.0.min.js"&gt;&lt;/script&gt;</span>, exactly like the <span class="kbd">sample.js</span> file from the previous topic.</p>
+      </div>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — the <span class="kbd">integrity</span> attribute on a CDN script</div>
+        <p>jQuery's official CDN snippet includes an <span class="kbd">integrity</span> attribute (a hash of the file) and <span class="kbd">crossorigin="anonymous"</span>, e.g. <span class="kbd">&lt;script src="..." integrity="sha256-..." crossorigin="anonymous"&gt;&lt;/script&gt;</span>. This is <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity" target="_blank" rel="noopener">Subresource Integrity (SRI)</a>: the browser hashes the downloaded file and compares it to the expected hash, refusing to run the script if they don't match. It protects you if the CDN is ever compromised and starts serving tampered code. Always copy the full snippet jQuery's site gives you, integrity attribute included — don't strip it down to just <span class="kbd">src</span>.</p>
+      </div>
 
       <h3>Basic syntax</h3>
       <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="javascript">$(selector).action();
@@ -1562,6 +1617,31 @@ $(document).ready(function() {
         <li><span class="kbd">.action()</span> — what to do to them (<span class="kbd">.hide()</span>, <span class="kbd">.show()</span>, <span class="kbd">.click()</span>, etc.).</li>
         <li><span class="kbd">$(document).ready(...)</span> — waits until the whole page has finished loading before running the code inside, so it never tries to act on an element that hasn't appeared yet.</li>
       </ul>
+
+      <div class="callout example">
+        <div class="callout-label">Example — separate hide and show buttons</div>
+        <p>Using ID selectors to wire up two different buttons to two different actions on the same paragraph:</p>
+        <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;script&gt;
+$(document).ready(function() {
+    $("#hide").click(function() {
+        $("p").hide();
+    });
+    $("#show").click(function() {
+        $("p").show();
+    });
+});
+&lt;/script&gt;
+
+&lt;p&gt;This is my first paragraph.&lt;/p&gt;
+&lt;button id="hide"&gt;Click here to hide&lt;/button&gt;
+&lt;button id="show"&gt;Click here to show&lt;/button&gt;</pre></div>
+        <p><span class="kbd">#hide</span> and <span class="kbd">#show</span> match the buttons' <span class="kbd">id</span> attributes, exactly like an ID selector in CSS. Each button's click handler only runs the action wired to <em>its own</em> id.</p>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Common pitfall</div>
+        <p>It's easy to swap the code inside two handlers by accident — e.g. writing <span class="kbd">.hide()</span> inside the <span class="kbd">#show</span> button's click handler — and get no visible error, just a button that silently does the wrong thing (or nothing). If a jQuery action doesn't seem to fire, double-check that the selector in <span class="kbd">$("#id")</span> actually matches the element you clicked, and that the action inside is the one you meant for that specific handler.</p>
+      </div>
 
       <div class="callout research">
         <div class="callout-label">Researched — is jQuery still worth learning?</div>
