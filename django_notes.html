@@ -1,0 +1,1526 @@
+<title>Django Notes — Sessions 3–10</title>
+<style>
+  @font-face {
+    font-family: 'ui-fallback';
+    src: local('Arial');
+  }
+
+  :root {
+    --bg: #f7f8f6;
+    --bg-elevated: #ffffff;
+    --bg-sunken: #eef1ec;
+    --text: #16211c;
+    --text-muted: #4b564f;
+    --text-faint: #7c887f;
+    --border: #dce3dd;
+    --border-strong: #c3cec5;
+    --accent: #1f5c3e;
+    --accent-strong: #123825;
+    --accent-soft: #e4efe8;
+    --gold: #9c6b14;
+    --gold-soft: #fbf1dd;
+    --gold-border: #e8c77e;
+    --blue: #1e4e8c;
+    --blue-soft: #e7eefb;
+    --blue-border: #afc7e8;
+    --purple: #6a3f9c;
+    --purple-soft: #f1e9fa;
+    --purple-border: #cbaee8;
+    --code-bg: #101613;
+    --code-text: #e7f1ea;
+    --code-border: #26332c;
+    --shadow: 0 1px 2px rgba(15, 30, 20, 0.06), 0 6px 20px rgba(15, 30, 20, 0.05);
+    --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+    --font-body: 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1613;
+      --bg-elevated: #16201b;
+      --bg-sunken: #101815;
+      --text: #e7ece8;
+      --text-muted: #9fb0a6;
+      --text-faint: #6d7c72;
+      --border: #263229;
+      --border-strong: #34433a;
+      --accent: #4fae7c;
+      --accent-strong: #7fcb9e;
+      --accent-soft: #1b2a21;
+      --gold: #e8c77e;
+      --gold-soft: #2a2011;
+      --gold-border: #4a3a1c;
+      --blue: #9dc0ee;
+      --blue-soft: #16233a;
+      --blue-border: #274268;
+      --purple: #c8a8ec;
+      --purple-soft: #241a33;
+      --purple-border: #4a3564;
+      --code-bg: #0a100d;
+      --code-text: #dcebe1;
+      --code-border: #1d2620;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1613;
+    --bg-elevated: #16201b;
+    --bg-sunken: #101815;
+    --text: #e7ece8;
+    --text-muted: #9fb0a6;
+    --text-faint: #6d7c72;
+    --border: #263229;
+    --border-strong: #34433a;
+    --accent: #4fae7c;
+    --accent-strong: #7fcb9e;
+    --accent-soft: #1b2a21;
+    --gold: #e8c77e;
+    --gold-soft: #2a2011;
+    --gold-border: #4a3a1c;
+    --blue: #9dc0ee;
+    --blue-soft: #16233a;
+    --blue-border: #274268;
+    --purple: #c8a8ec;
+    --purple-soft: #241a33;
+    --purple-border: #4a3564;
+    --code-bg: #0a100d;
+    --code-text: #dcebe1;
+    --code-border: #1d2620;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #f7f8f6;
+    --bg-elevated: #ffffff;
+    --bg-sunken: #eef1ec;
+    --text: #16211c;
+    --text-muted: #4b564f;
+    --text-faint: #7c887f;
+    --border: #dce3dd;
+    --border-strong: #c3cec5;
+    --accent: #1f5c3e;
+    --accent-strong: #123825;
+    --accent-soft: #e4efe8;
+    --gold: #9c6b14;
+    --gold-soft: #fbf1dd;
+    --gold-border: #e8c77e;
+    --blue: #1e4e8c;
+    --blue-soft: #e7eefb;
+    --blue-border: #afc7e8;
+    --purple: #6a3f9c;
+    --purple-soft: #f1e9fa;
+    --purple-border: #cbaee8;
+    --code-bg: #101613;
+    --code-text: #e7f1ea;
+    --code-border: #26332c;
+    --shadow: 0 1px 2px rgba(15, 30, 20, 0.06), 0 6px 20px rgba(15, 30, 20, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, .navlink:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--text);
+    text-wrap: balance;
+    line-height: 1.2;
+  }
+
+  code, pre, .mono { font-family: var(--font-mono); }
+
+  /* ---------- Shell layout ---------- */
+  .shell {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .topbar {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar button {
+    font: inherit;
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.4rem 0.65rem;
+    cursor: pointer;
+  }
+  .topbar .topbar-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  aside.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    background: var(--bg-elevated);
+    padding: 1.5rem 1.1rem 3rem;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .brand .mark .dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    flex: none;
+  }
+  .brand .sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  nav.toc { display: flex; flex-direction: column; gap: 1.3rem; }
+  .toc-group-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin: 0 0 0.5rem 0.55rem;
+  }
+  .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+  .navlink {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.87rem;
+    padding: 0.4rem 0.55rem;
+    border-radius: 7px;
+    border-left: 2px solid transparent;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .navlink .n {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    flex: none;
+    width: 1.3em;
+  }
+  .navlink:hover { background: var(--bg-sunken); color: var(--text); }
+  .navlink.active {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+
+  main {
+    min-width: 0;
+    padding: 3.5rem clamp(1.25rem, 4vw, 4rem) 8rem;
+  }
+  .content-col { max-width: 700px; margin: 0 auto; }
+
+  /* ---------- Hero / intro ---------- */
+  .hero {
+    max-width: 700px;
+    margin: 0 auto 3rem;
+  }
+  .hero .eyebrow {
+    font-size: 0.78rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .hero h1 { font-size: clamp(1.9rem, 4vw, 2.5rem); margin: 0 0 0.75rem; }
+  .hero .dek {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    max-width: 58ch;
+    margin: 0 0 1.75rem;
+  }
+
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0.6rem;
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .legend-item { display: flex; gap: 0.6rem; align-items: flex-start; }
+  .legend-swatch {
+    flex: none;
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 4px;
+    margin-top: 0.25rem;
+  }
+  .legend-swatch.video { background: var(--accent); }
+  .legend-swatch.gap { background: var(--gold); }
+  .legend-swatch.research { background: var(--blue); }
+  .legend-text b { display: block; font-size: 0.85rem; color: var(--text); }
+  .legend-text span { font-size: 0.79rem; color: var(--text-muted); }
+
+  /* ---------- Sections ---------- */
+  section.topic {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 3.2rem 0;
+    border-top: 1px solid var(--border);
+  }
+  section.topic:first-of-type { border-top: none; padding-top: 0.5rem; }
+
+  .topic-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-faint);
+    margin-bottom: 0.85rem;
+  }
+  .topic-eyebrow .session-chip {
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  h2.topic-title { font-size: clamp(1.4rem, 3vw, 1.75rem); margin: 0 0 0.6rem; }
+  p.lede {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin: 0 0 1.6rem;
+    max-width: 62ch;
+  }
+
+  .topic h3 {
+    font-size: 1.05rem;
+    margin: 2rem 0 0.75rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .topic h3::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--accent);
+    border-radius: 2px;
+    display: inline-block;
+    flex: none;
+  }
+
+  .topic p { margin: 0 0 1rem; max-width: 66ch; }
+  .topic ul, .topic ol { margin: 0 0 1rem; padding-left: 1.3rem; max-width: 64ch; }
+  .topic li { margin-bottom: 0.4rem; }
+
+  dfn {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    padding: 0.05rem 0.3rem;
+    border-radius: 4px;
+  }
+  :root[data-theme="dark"] dfn, .topic dfn { color: var(--accent-strong); }
+
+  /* ---------- Code blocks ---------- */
+  .code-wrap { margin: 0 0 1.3rem; border-radius: 10px; overflow: hidden; border: 1px solid var(--code-border); box-shadow: var(--shadow); }
+  .code-wrap-scroll { overflow-x: auto; }
+  pre.code {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 1rem 1.1rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    position: relative;
+    min-width: max-content;
+  }
+  pre.code[data-lang]::before {
+    content: attr(data-lang);
+    display: block;
+    position: sticky;
+    left: 0;
+    width: fit-content;
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    background: rgba(255,255,255,0.06);
+    padding: 0.1rem 0.5rem;
+    border-radius: 20px;
+    margin-bottom: 0.7rem;
+  }
+  pre.code .c { color: #7c8f82; font-style: italic; }
+  .code-note {
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 0.7rem 1.1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: -1.3rem;
+  }
+  .code-wrap + .code-note { margin-top: -1.3rem; }
+
+  /* ---------- Callouts ---------- */
+  .callout {
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 0.95rem 1.1rem;
+    margin: 0 0 1.3rem;
+    max-width: 66ch;
+  }
+  .callout-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .callout p, .callout ul { margin: 0 0 0.5rem; max-width: none; }
+  .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+
+  .callout.practice { background: var(--accent-soft); border-color: var(--accent); }
+  .callout.practice .callout-label { color: var(--accent-strong); }
+
+  .callout.gapfill { background: var(--gold-soft); border-color: var(--gold-border); }
+  .callout.gapfill .callout-label { color: var(--gold); }
+
+  .callout.research { background: var(--blue-soft); border-color: var(--blue-border); }
+  .callout.research .callout-label { color: var(--blue); }
+
+  .callout.example { background: var(--purple-soft); border-color: var(--purple-border); }
+  .callout.example .callout-label { color: var(--purple); }
+
+  /* ---------- Flow diagrams ---------- */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1.2rem 0 1.6rem;
+    padding: 1.1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--bg-sunken);
+    border: 1px solid var(--border-strong);
+    border-radius: 9px;
+    min-width: 108px;
+  }
+  .flow-step b { font-size: 0.85rem; color: var(--text); }
+  .flow-step span { font-size: 0.72rem; color: var(--text-muted); }
+  .flow-arrow { color: var(--text-faint); font-size: 1.1rem; flex: none; padding: 0 0.1rem; }
+
+  /* ---------- Misc ---------- */
+  .kbd, .tag {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    padding: 0.05rem 0.4rem;
+    border-radius: 5px;
+  }
+
+  table.ref {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.87rem;
+    margin: 0 0 1.3rem;
+  }
+  table.ref th, table.ref td {
+    text-align: left;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+  table.ref th { color: var(--text-faint); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  table.ref td.mono { font-family: var(--font-mono); font-size: 0.83rem; }
+  .table-scroll { overflow-x: auto; margin-bottom: 1.3rem; }
+  .table-scroll table.ref { margin-bottom: 0; }
+
+  footer.end {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2.5rem 0 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: 0.83rem;
+  }
+
+  @media (max-width: 880px) {
+    .shell { grid-template-columns: 1fr; }
+    .topbar { display: flex; }
+    aside.sidebar {
+      position: fixed;
+      inset: 0 20% 0 0;
+      z-index: 40;
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      box-shadow: var(--shadow);
+    }
+    body.nav-open aside.sidebar { transform: translateX(0); }
+    body.nav-open::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 35;
+    }
+    main { padding-top: 2rem; }
+  }
+</style>
+
+<div class="shell">
+  <div class="topbar">
+    <button id="navToggle" aria-label="Toggle contents" aria-expanded="false">☰ Contents</button>
+    <span class="topbar-title">Django Notes</span>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="mark"><span class="dot"></span>Django Notes</span>
+      <span class="sub">Sessions 3–10, explained from scratch</span>
+    </div>
+    <nav class="toc" aria-label="Table of contents">
+      <div>
+        <div class="toc-group-label">Getting started</div>
+        <ul class="toc-list">
+          <li><a class="navlink" href="#t1"><span class="n">01</span>Checking your tools &amp; installing Django</a></li>
+          <li><a class="navlink" href="#t2"><span class="n">02</span>Virtual environments</a></li>
+          <li><a class="navlink" href="#t3"><span class="n">03</span>Creating a project and an app</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="toc-group-label">Anatomy of a project</div>
+        <ul class="toc-list">
+          <li><a class="navlink" href="#t4"><span class="n">04</span>The MVT architecture</a></li>
+          <li><a class="navlink" href="#t5"><span class="n">05</span>Project file structure</a></li>
+          <li><a class="navlink" href="#t6"><span class="n">06</span>Your first view</a></li>
+          <li><a class="navlink" href="#t7"><span class="n">07</span>URL routing: project vs. app level</a></li>
+          <li><a class="navlink" href="#t8"><span class="n">08</span>Admin panel &amp; superuser</a></li>
+          <li><a class="navlink" href="#t9"><span class="n">09</span>Models &amp; migrations</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="toc-group-label">Front-end foundations</div>
+        <ul class="toc-list">
+          <li><a class="navlink" href="#t10"><span class="n">10</span>HTML basics</a></li>
+          <li><a class="navlink" href="#t11"><span class="n">11</span>HTML forms</a></li>
+          <li><a class="navlink" href="#t12"><span class="n">12</span>CSS basics &amp; the 3 ways to style</a></li>
+          <li><a class="navlink" href="#t13"><span class="n">13</span>CSS selectors &amp; priority</a></li>
+          <li><a class="navlink" href="#t14"><span class="n">14</span>Backgrounds, div/span &amp; overflow</a></li>
+          <li><a class="navlink" href="#t15"><span class="n">15</span>JavaScript basics</a></li>
+          <li><a class="navlink" href="#t16"><span class="n">16</span>DOM &amp; form validation</a></li>
+          <li><a class="navlink" href="#t17"><span class="n">17</span>jQuery basics</a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="hero">
+      <div class="eyebrow">Personal study notes</div>
+      <h1>Django, from the ground up</h1>
+      <p class="dek">Rewritten from video transcripts (sessions 3–10) into notes a first-time Django learner can actually follow — every term defined, every command explained, nothing assumed.</p>
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-swatch video"></span>
+          <span class="legend-text"><b>Main text</b><span>Explained from what the video covered</span></span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch gap"></span>
+          <span class="legend-text"><b>Gap‑filled</b><span>My addition, where the video skipped or rushed</span></span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch research"></span>
+          <span class="legend-text"><b>Researched</b><span>Looked up in Django's official docs, not in the video</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-col">
+
+    <!-- ============ TOPIC 1 ============ -->
+    <section class="topic" id="t1">
+      <div class="topic-eyebrow"><span class="session-chip">Session 3</span>Getting started</div>
+      <h2 class="topic-title">01 · Checking your tools &amp; installing Django</h2>
+      <p class="lede">Before you build anything, you check that Python, pip, and Django are actually installed — and if Django isn't there yet, you install it with one command.</p>
+
+      <h3>What's actually going on</h3>
+      <p>Django is not part of Python itself — it's an extra package you install on top of Python. So the very first thing every Django developer does is confirm three things are in place: Python, <dfn>pip</dfn> (Python's package installer — a tool that downloads and manages extra libraries like Django), and Django itself.</p>
+
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="bash"><span class="c"># Check which Python version you have</span>
+python --version
+
+<span class="c"># Check which pip version you have</span>
+pip --version
+
+<span class="c"># Check which Django version you have (only works if Django is installed)</span>
+django-admin --version
+
+<span class="c"># Install Django</span>
+pip install django</pre></div>
+      <div class="code-note">If <span class="kbd">django-admin --version</span> replies with something like "command not found," that just means Django isn't installed yet — run <span class="kbd">pip install django</span> and try again.</div>
+
+      <h3>Why this step</h3>
+      <p>Checking versions first saves you from a very common beginner trap: following a tutorial written for a different Python or Django version and getting confused by errors that have nothing to do with your actual code. It also confirms pip is working, since you'll use pip constantly to install every other package your project needs later (like the REST framework, database drivers, etc.).</p>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Real projects pin exact versions instead of just "having Django installed" — e.g. a <span class="kbd">requirements.txt</span> file listing <span class="kbd">Django==5.0.6</span>. That way, everyone on the team (and the production server) runs the exact same version, instead of "it works on my machine."</p>
+      </div>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>The video's commands were transcribed a little garbled (e.g. "Django admin admin"). The real commands are exactly <span class="kbd">python --version</span>, <span class="kbd">pip --version</span>, and <span class="kbd">django-admin --version</span> — two dashes before "version", no extra words.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 2 ============ -->
+    <section class="topic" id="t2">
+      <div class="topic-eyebrow"><span class="session-chip">Session 3</span>Getting started</div>
+      <h2 class="topic-title">02 · Virtual environments</h2>
+      <p class="lede">A virtual environment is a private, isolated copy of Python just for one project, so its packages don't clash with any other project's packages.</p>
+
+      <h3>What it is</h3>
+      <p>Imagine every Python project on your computer shared one single toolbox. If Project A needs Django 4 and Project B needs Django 5, they'd fight over which version sits in the toolbox. A <dfn>virtual environment</dfn> (often shortened to "venv") gives each project its own private toolbox, so Project A and Project B can each have the Django version they need, at the same time, with zero conflict.</p>
+
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="bash"><span class="c"># Create a virtual environment named "venv" inside your project folder</span>
+python -m venv venv
+
+<span class="c"># Activate it — Windows</span>
+venv\Scripts\activate
+
+<span class="c"># Activate it — macOS / Linux</span>
+source venv/bin/activate
+
+<span class="c"># Once activated, install packages as normal — they stay inside this venv</span>
+pip install django</pre></div>
+      <div class="code-note">You'll know it's active because your terminal prompt gets a <span class="kbd">(venv)</span> prefix. To leave it, type <span class="kbd">deactivate</span>.</div>
+
+      <h3>Why this step</h3>
+      <p>Without a virtual environment, every <span class="kbd">pip install</span> you run installs the package globally on your machine — for every project. Over time this turns into a mess where projects silently break each other. Isolating per project means you can delete a project's venv folder and nothing else on your computer is affected.</p>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>The video describes installing a separate tool called <span class="kbd">virtualenvwrapper</span> to create environments. That tool still exists, but it's an older, Windows-command-prompt-era convenience wrapper. Since Python 3.3, Python ships a built-in <span class="kbd">venv</span> module — <span class="kbd">python -m venv venv</span> — which does the same job with no extra install. That's the command shown above, and it's what you'll see in almost all current tutorials and the official Django docs.</p>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Never commit your <span class="kbd">venv</span> folder to Git — it's large and machine-specific. Instead, commit a <span class="kbd">requirements.txt</span> (generated with <span class="kbd">pip freeze &gt; requirements.txt</span>) and add <span class="kbd">venv/</span> to your <span class="kbd">.gitignore</span>. Anyone cloning your project just runs <span class="kbd">pip install -r requirements.txt</span> inside their own fresh venv.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 3 ============ -->
+    <section class="topic" id="t3">
+      <div class="topic-eyebrow"><span class="session-chip">Session 3–4</span>Getting started</div>
+      <h2 class="topic-title">03 · Creating a project and an app</h2>
+      <p class="lede">A Django <em>project</em> is the whole website; an <em>app</em> is one self-contained feature inside it. You create the project once, then create as many apps inside it as your site needs.</p>
+
+      <h3>What it is</h3>
+      <p>This distinction trips up a lot of beginners because the video (like most spoken explanations) uses "project" and "application" almost interchangeably in places. Here's the clean version:</p>
+      <ul>
+        <li><strong>Project</strong> — the top-level container: overall settings, the main URL map, and the folder that ties everything together. You typically have exactly one per website.</li>
+        <li><strong>App</strong> — a smaller, focused module inside the project that handles one piece of functionality (e.g. a <span class="kbd">blog</span> app, a <span class="kbd">payments</span> app, an <span class="kbd">accounts</span> app). A project can contain many apps, and well-designed apps can even be reused across different projects.</li>
+      </ul>
+
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="bash"><span class="c"># 1. Create the project (run this once)</span>
+django-admin startproject myproject
+
+<span class="c"># 2. Move into the project folder</span>
+cd myproject
+
+<span class="c"># 3. Create an app inside it (repeat for each app you need)</span>
+python manage.py startapp myapp
+
+<span class="c"># 4. Start the development server</span>
+python manage.py runserver</pre></div>
+      <div class="code-note">After <span class="kbd">runserver</span>, open <span class="kbd">http://127.0.0.1:8000/</span> in a browser (<span class="kbd">127.0.0.1</span> and <span class="kbd">localhost</span> both mean "this computer"). Seeing Django's "install worked" page confirms everything so far is correct.</div>
+
+      <h3>Why two different commands?</h3>
+      <p>Notice <span class="kbd">startproject</span> uses <span class="kbd">django-admin</span> (a general command-line tool that exists outside any project), while <span class="kbd">startapp</span> uses <span class="kbd">manage.py</span> (a file that gets generated inside your project and knows about that specific project's settings). That's why you must <span class="kbd">cd</span> into the project folder before creating an app — <span class="kbd">manage.py</span> only exists there.</p>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — code editors</div>
+        <p>The video spends time recommending PyCharm Professional (a paid, 30-day-trial editor) because it auto-generates project files through a UI. That's a convenience, not a requirement — Django itself doesn't care what editor you use. <a href="https://code.visualstudio.com/" target="_blank" rel="noopener">VS Code</a> is free, has excellent Python/Django extensions, and is what the majority of Django developers use day to day. The command-line steps above work identically no matter which editor you open the resulting folder in.</p>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Name apps after what they <em>do</em>, not generically (<span class="kbd">blog</span>, <span class="kbd">orders</span>, <span class="kbd">accounts</span> — not <span class="kbd">app1</span>, <span class="kbd">myapp</span>). It matters because the app name becomes a Python package name used throughout your code and database table names.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 4 ============ -->
+    <section class="topic" id="t4">
+      <div class="topic-eyebrow"><span class="session-chip">Session 3–5</span>Anatomy of a project</div>
+      <h2 class="topic-title">04 · The MVT architecture</h2>
+      <p class="lede">Django organizes every feature into three cooperating pieces: a Model (data), a View (logic), and a Template (what the user sees) — MVT for short.</p>
+
+      <h3>What it is</h3>
+      <p>Think of a login page. There's the box the user types into (what they see), the check of whether their password is correct (what the computer does), and the actual stored record of the correct password (where the data lives). Django gives each of those a name and a dedicated place to live:</p>
+      <ul>
+        <li><strong>Model</strong> — represents your data. Each model is a Python class that Django turns into a database table. This lives in <span class="kbd">models.py</span>.</li>
+        <li><strong>View</strong> — the logic. A Python function (or class) that receives a request, does something (maybe checks the database via a model), and sends back a response. This lives in <span class="kbd">views.py</span>.</li>
+        <li><strong>Template</strong> — the presentation layer, i.e. the HTML the user actually sees in their browser.</li>
+      </ul>
+
+      <div class="flow">
+        <div class="flow-step"><b>Browser</b><span>sends a request</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>urls.py</b><span>matches the address</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>View</b><span>runs the logic</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>Model</b><span>reads/writes data</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>Template</b><span>renders HTML</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>Browser</b><span>shows the page</span></div>
+      </div>
+
+      <h3>Why it matters</h3>
+      <p>Separating these three concerns means you can change how a page <em>looks</em> (template) without touching how it <em>works</em> (view), and change how data is <em>stored</em> (model) without rewriting the page. This separation is what makes a growing Django project stay manageable instead of turning into one giant tangled file.</p>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — MVT vs. MVC</div>
+        <p>You may have heard of the more common <strong>MVC</strong> (Model-View-Controller) pattern from other languages. Django's MVT is conceptually the same idea with different naming: Django's "View" is really the <em>controller</em> (the logic that decides what happens), and Django's "Template" is really the <em>view</em> (what's displayed) in classic MVC terms. Django's own <a href="https://docs.djangoproject.com/en/stable/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template-how-come-you-don-t-use-the-standard-names" target="_blank" rel="noopener">FAQ</a> confirms this — the "controller" role is handled by Django's framework itself (the URL dispatcher), which is why there's no separate "C" in MVT.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 5 ============ -->
+    <section class="topic" id="t5">
+      <div class="topic-eyebrow"><span class="session-chip">Session 4</span>Anatomy of a project</div>
+      <h2 class="topic-title">05 · Project file structure</h2>
+      <p class="lede">Running <span class="kbd">startproject</span> and <span class="kbd">startapp</span> generates a set of files automatically. Each one has a specific, fixed job — here's what each does and when you'll actually touch it.</p>
+
+      <h3>Project-level files</h3>
+      <p>These live in the inner folder named after your project (e.g. <span class="kbd">myproject/myproject/</span>) and control the whole site.</p>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>File</th><th>What it does</th></tr>
+        <tr><td class="mono">manage.py</td><td>The command-line utility for this project — every command (<span class="kbd">runserver</span>, <span class="kbd">startapp</span>, <span class="kbd">makemigrations</span>, etc.) runs through it.</td></tr>
+        <tr><td class="mono">settings.py</td><td>Global configuration: installed apps, database connection, middleware, templates folder location — one file that affects the entire project.</td></tr>
+        <tr><td class="mono">urls.py</td><td>The site's URL map — decides which view runs for which web address.</td></tr>
+        <tr><td class="mono">wsgi.py</td><td>Entry point used by traditional web servers (like Apache) to run your Django app in production. You won't edit this during development.</td></tr>
+        <tr><td class="mono">asgi.py</td><td>The newer, async-capable counterpart to wsgi.py, for servers that support asynchronous features (e.g. WebSockets). Also not touched in normal development.</td></tr>
+        <tr><td class="mono">__init__.py</td><td>An empty file that just tells Python "treat this folder as a package." You never put code in it.</td></tr>
+      </table></div>
+
+      <h3>App-level files</h3>
+      <p>These are generated fresh inside every app folder you create with <span class="kbd">startapp</span>.</p>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>File</th><th>What it does</th></tr>
+        <tr><td class="mono">models.py</td><td>Define this app's data — Python classes that become database tables.</td></tr>
+        <tr><td class="mono">views.py</td><td>This app's logic — functions/classes that handle requests and return responses.</td></tr>
+        <tr><td class="mono">admin.py</td><td>Register models here to manage them through Django's built-in admin panel.</td></tr>
+        <tr><td class="mono">apps.py</td><td>Small configuration class for this app; default settings are almost always fine as-is.</td></tr>
+        <tr><td class="mono">migrations/</td><td>Auto-generated history of every change made to your models, used to keep the database in sync.</td></tr>
+        <tr><td class="mono">tests.py</td><td>Where you write automated tests for this app's code.</td></tr>
+      </table></div>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>The video walks through most of these files but never mentions <span class="kbd">tests.py</span>, which Django generates automatically in every new app. It's where you write code that automatically checks your app still works correctly as you make changes — an important habit once your apps grow beyond a few views.</p>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Register every new app in <span class="kbd">INSTALLED_APPS</span> inside <span class="kbd">settings.py</span> the moment you create it — an app that isn't registered there is invisible to Django (its models won't migrate, its templates won't be found). This is the single most common "why isn't this working" mistake for beginners.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 6 ============ -->
+    <section class="topic" id="t6">
+      <div class="topic-eyebrow"><span class="session-chip">Session 4–5</span>Anatomy of a project</div>
+      <h2 class="topic-title">06 · Your first view</h2>
+      <p class="lede">A view is just a Python function that takes a web request and returns a web response — the simplest one just sends back a line of text.</p>
+
+      <h3>Writing the view</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="python"><span class="c"># myapp/views.py</span>
+from django.http import HttpResponse
+
+def v1(request):
+    return HttpResponse("This is my first Django web application.")</pre></div>
+      <ul>
+        <li><span class="kbd">request</span> — every view function must accept this parameter; Django passes in details of the incoming browser request. You don't have to use it, but it must be there.</li>
+        <li><span class="kbd">HttpResponse</span> — a Django class that wraps whatever text/HTML you give it into a proper web response the browser understands. You import it from <span class="kbd">django.http</span>.</li>
+      </ul>
+
+      <h3>Connecting it to a URL</h3>
+      <p>A view does nothing on its own — Django needs to know <em>which web address</em> should trigger it. That mapping happens in <span class="kbd">urls.py</span>:</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="python"><span class="c"># myproject/urls.py</span>
+from django.contrib import admin
+from django.urls import path
+from myapp import views
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('v1/', views.v1),
+]</pre></div>
+      <div class="code-note">Now visiting <span class="kbd">http://127.0.0.1:8000/v1/</span> runs <span class="kbd">v1()</span> and shows its response. Visiting <span class="kbd">/v1</span> without the trailing content will 404 (page not found) since no pattern matches it exactly.</div>
+
+      <h3>Request/response flow</h3>
+      <div class="flow">
+        <div class="flow-step"><b>1. Client</b><span>requests <span class="mono">/v1/</span></span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>2. urls.py</b><span>finds matching path</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>3. views.v1()</b><span>executes</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>4. Response</b><span>sent back to browser</span></div>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Returning raw <span class="kbd">HttpResponse</span> text like this is only for learning the request/response cycle. Real views almost always use <span class="kbd">render()</span> to return a full HTML template instead — you'll see this properly once templates are introduced. Avoid writing HTML directly inside a Python string in real projects; keep HTML in template files.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 7 ============ -->
+    <section class="topic" id="t7">
+      <div class="topic-eyebrow"><span class="session-chip">Session 5</span>Anatomy of a project</div>
+      <h2 class="topic-title">07 · URL routing: project-level vs. app-level</h2>
+      <p class="lede">Once a project has more than one app, cramming every URL into the project's single urls.py becomes messy. The fix: give each app its own urls.py, and have the project file simply hand off to it.</p>
+
+      <h3>The problem with one big urls.py</h3>
+      <p>If <span class="kbd">myapp</span> and <span class="kbd">myapp_one</span> both define a view called <span class="kbd">v1</span>, and both are imported into the same project-level <span class="kbd">urls.py</span>, Python's import system only keeps the <em>most recent</em> import of that name — so one app's view silently shadows the other's. This is exactly the confusing bug the video runs into.</p>
+
+      <h3>The fix: per-app urls.py + include()</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="python"><span class="c"># myapp/urls.py  (new file you create yourself)</span>
+from django.urls import path
+from myapp import views
+
+urlpatterns = [
+    path('v1/', views.v1),
+    path('v2/', views.v2),
+]</pre></div>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="python"><span class="c"># myproject/urls.py  (project-level — just delegates)</span>
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('myapp/', include('myapp.urls')),
+    path('myapp-one/', include('myapp_one.urls')),
+]</pre></div>
+      <div class="code-note">Now <span class="kbd">/myapp/v1/</span> and <span class="kbd">/myapp-one/v1/</span> are two completely distinct, unambiguous addresses — even though both apps have a view named <span class="kbd">v1</span>.</div>
+
+      <div class="flow">
+        <div class="flow-step"><b>Request</b><span><span class="mono">/myapp/v1/</span></span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>Project urls.py</b><span>sees "myapp/" prefix</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>include()</b><span>hands off remaining path</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>myapp/urls.py</b><span>matches "v1/"</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><b>views.v1</b><span>runs</span></div>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Every real Django project uses app-level <span class="kbd">urls.py</span> + <span class="kbd">include()</span> — it's considered a firm convention, not optional. It keeps apps self-contained (an app's URLs live with the app) and means the project-level file stays short and readable no matter how many apps you add.</p>
+      </div>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>The video also mentions optionally giving each URL pattern a <em>name</em>, e.g. <span class="kbd">path('v1/', views.v1, name='view-one')</span>. This isn't just cosmetic — a named URL lets you reference it elsewhere in your code (templates, redirects) as <span class="kbd">'view-one'</span> instead of hardcoding the string <span class="kbd">'/myapp/v1/'</span>. If you ever change the actual URL path later, every reference using the name still works automatically. This is standard practice in real projects.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 8 ============ -->
+    <section class="topic" id="t8">
+      <div class="topic-eyebrow"><span class="session-chip">Session 4</span>Anatomy of a project</div>
+      <h2 class="topic-title">08 · Admin panel &amp; superuser</h2>
+      <p class="lede">Django gives you a ready-made admin website for managing your data — you just need to create a superuser account to log into it, and register your models so they show up.</p>
+
+      <h3>Creating a superuser</h3>
+      <p>A <dfn>superuser</dfn> is an administrator account with full permissions — it can log into the admin panel, manage other users, and edit any registered data.</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="bash">python manage.py createsuperuser
+<span class="c"># then follow the prompts: username, email (optional), password</span></pre></div>
+      <p>With the server running, visit <span class="kbd">http://127.0.0.1:8000/admin/</span> and log in with those credentials.</p>
+
+      <h3>Making a model visible in the admin</h3>
+      <p>Just because a model exists in <span class="kbd">models.py</span> doesn't mean it appears in the admin panel — you have to register it explicitly:</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="python"><span class="c"># myapp/admin.py</span>
+from django.contrib import admin
+from .models import Student
+
+admin.site.register(Student)</pre></div>
+
+      <h3>Why this step</h3>
+      <p>The admin panel is one of Django's biggest time-savers — instead of writing your own "add/edit/delete records" pages, Django auto-generates a working management UI for any model you register. It's meant for site administrators/staff, not end users of the public website.</p>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Never expose the default <span class="kbd">/admin/</span> URL as-is on a real production site without extra hardening (strong passwords, limiting who has superuser accounts, and often changing the admin URL path) — it's a well-known target since every Django site has one by default.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 9 ============ -->
+    <section class="topic" id="t9">
+      <div class="topic-eyebrow"><span class="session-chip">Session 4</span>Anatomy of a project</div>
+      <h2 class="topic-title">09 · Models &amp; migrations</h2>
+      <p class="lede">A model is a Python class that describes a database table. Migrations are the mechanism that turns that class into actual tables and columns in your database.</p>
+
+      <h3>What it is</h3>
+      <p>Instead of writing raw SQL to create tables, you describe your data as a Python class. Django reads that class and generates the equivalent SQL for you.</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="python"><span class="c"># myapp/models.py</span>
+from django.db import models
+
+class Student(models.Model):
+    s_id = models.IntegerField()
+    s_name = models.CharField(max_length=100)
+    s_address = models.CharField(max_length=200)
+    s_location = models.CharField(max_length=100)</pre></div>
+      <ul>
+        <li>The class <span class="kbd">Student</span> becomes a database table named (by default) <span class="kbd">myapp_student</span>.</li>
+        <li>Each class attribute becomes a column — <span class="kbd">s_name</span> becomes a column that only accepts text up to 100 characters (<span class="kbd">CharField(max_length=100)</span>), <span class="kbd">s_id</span> only accepts whole numbers (<span class="kbd">IntegerField</span>), and so on.</li>
+      </ul>
+
+      <h3>Turning the class into a real table</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="bash"><span class="c"># Step 1 — generate a migration file describing what changed</span>
+python manage.py makemigrations
+
+<span class="c"># Step 2 — actually apply those changes to the database</span>
+python manage.py migrate</pre></div>
+      <p><span class="kbd">makemigrations</span> looks at your models and writes a migration file (inside the app's <span class="kbd">migrations/</span> folder) containing the SQL needed to match the database to your models. <span class="kbd">migrate</span> then runs that SQL against the actual database, creating or updating the real tables.</p>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>The video describes the <em>concept</em> of migrations in detail but never shows an actual <span class="kbd">models.py</span> class with real field types. The example above (<span class="kbd">CharField</span>, <span class="kbd">IntegerField</span>) fills that gap — these field types are how Django knows what kind of column to create and what validation to apply.</p>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Run <span class="kbd">makemigrations</span> every time you change a model, and commit the generated migration files to version control — they're part of your project's history, not throwaway files. Never edit an already-applied migration file by hand; if a model needs to change further, make the change and run <span class="kbd">makemigrations</span> again to generate a new one.</p>
+      </div>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — the default database</div>
+        <p>Every new Django project is pre-configured (in <span class="kbd">settings.py</span>, under <span class="kbd">DATABASES</span>) to use <a href="https://docs.djangoproject.com/en/stable/ref/settings/#databases" target="_blank" rel="noopener">SQLite</a> — a lightweight, file-based database (your project's <span class="kbd">db.sqlite3</span> file) that needs no separate server, which is why it works instantly for learning. Production sites usually switch to PostgreSQL or MySQL by changing this same settings block — the rest of your code (models, views) doesn't need to change.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 10 ============ -->
+    <section class="topic" id="t10">
+      <div class="topic-eyebrow"><span class="session-chip">Session 6</span>Front-end foundations</div>
+      <h2 class="topic-title">10 · HTML basics</h2>
+      <p class="lede">HTML (HyperText Markup Language) is the mandatory foundation of every web page — it describes <em>content and structure</em>, not styling or behavior.</p>
+
+      <h3>The basic structure</h3>
+      <p>Every HTML page has two main parts: a <span class="kbd">&lt;head&gt;</span> (metadata — page title, links to CSS/JS files, not visible on the page itself) and a <span class="kbd">&lt;body&gt;</span> (the actual visible content).</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Home Page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;This is heading one&lt;/h1&gt;
+    &lt;p&gt;This is a paragraph.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre></div>
+      <ul>
+        <li><span class="kbd">&lt;!DOCTYPE html&gt;</span> — tells the browser this is a modern HTML5 document.</li>
+        <li><span class="kbd">&lt;meta charset="UTF-8"&gt;</span> — sets the character encoding so text (including special characters) displays correctly.</li>
+        <li><span class="kbd">&lt;title&gt;</span> — the text shown on the browser tab, not on the page itself.</li>
+        <li><span class="kbd">&lt;h1&gt;</span> to <span class="kbd">&lt;h6&gt;</span> — heading levels, from largest/most important (<span class="kbd">h1</span>) to smallest (<span class="kbd">h6</span>).</li>
+        <li><span class="kbd">&lt;p&gt;</span> — a paragraph of text.</li>
+      </ul>
+
+      <h3>Creating &amp; previewing an HTML file inside a Django project</h3>
+      <p>Outside of Django, writing an HTML page usually means opening a plain text editor, typing the tags by hand, saving the file with a <span class="kbd">.html</span> extension, then double-clicking it to open it in a browser. Inside a Django project this is smoother: in the <span class="kbd">templates</span> folder, right-click → <em>New</em> → <em>HTML File</em>, give it a name (e.g. <span class="kbd">home.html</span>), and the editor auto-generates the boilerplate skeleton for you (<span class="kbd">&lt;!DOCTYPE html&gt;</span>, <span class="kbd">&lt;html&gt;</span>, <span class="kbd">&lt;head&gt;</span> with a charset meta tag, empty <span class="kbd">&lt;body&gt;</span>) — you don't type that scaffold from scratch every time.</p>
+      <p>To preview it, most Django-aware editors show browser icons (Chrome, Firefox, Edge) right next to the file — clicking one opens a live preview of that HTML file directly, with no separate "run" step needed.</p>
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>This in-editor preview is just a convenience for *looking at* the static markup while you're learning HTML in isolation. Once this HTML becomes a real Django template, you won't open the <span class="kbd">.html</span> file directly in a browser anymore — you'll visit a URL that your Django dev server serves (e.g. <span class="kbd">http://127.0.0.1:8000/</span>), which runs it through a view first. Opening the raw file skips Django entirely and any <span class="kbd">{{ }}</span> template tags would show up as literal text instead of rendering.</p>
+      </div>
+
+      <h3>Comments</h3>
+      <p>A comment is text the browser parses but never displays — used to leave notes for yourself or other developers reading the code later.</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;!-- This is a comment, it will not show up on the page --&gt;
+&lt;h1&gt;This is heading one&lt;/h1&gt;</pre></div>
+      <p>Comments start with <span class="kbd">&lt;!--</span> and end with <span class="kbd">--&gt;</span> — anything in between (even multiple lines) is ignored by the browser.</p>
+
+      <h3>Lists</h3>
+      <p>HTML has two list types: <span class="kbd">&lt;ol&gt;</span> (ordered — numbered) and <span class="kbd">&lt;ul&gt;</span> (unordered — bulleted). Each item inside either one uses <span class="kbd">&lt;li&gt;</span> (list item).</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;ol&gt;
+    &lt;li&gt;C&lt;/li&gt;
+    &lt;li&gt;C++&lt;/li&gt;
+    &lt;li&gt;Python&lt;/li&gt;
+&lt;/ol&gt;</pre></div>
+      <p>By default an <span class="kbd">&lt;ol&gt;</span> numbers items <span class="kbd">1, 2, 3…</span>. The <span class="kbd">type</span> attribute changes the numbering style:</p>
+      <div class="table-scroll"><table class="ref">
+        <tr><th><span class="kbd">type</span> value</th><th>Renders as</th></tr>
+        <tr><td class="mono">1</td><td>1, 2, 3, 4 (default — you can omit <span class="kbd">type</span> entirely)</td></tr>
+        <tr><td class="mono">A</td><td>A, B, C, D</td></tr>
+        <tr><td class="mono">a</td><td>a, b, c, d</td></tr>
+        <tr><td class="mono">I</td><td>I, II, III, IV (uppercase Roman numerals)</td></tr>
+        <tr><td class="mono">i</td><td>i, ii, iii, iv (lowercase Roman numerals)</td></tr>
+      </table></div>
+      <div class="callout example">
+        <div class="callout-label">Example</div>
+        <p>An ordered list of the podium finishers, lettered instead of numbered:</p>
+        <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;ol type="A"&gt;
+    &lt;li&gt;Asha&lt;/li&gt;
+    &lt;li&gt;Ravi&lt;/li&gt;
+    &lt;li&gt;Meera&lt;/li&gt;
+&lt;/ol&gt;
+&lt;!-- Renders as: A. Asha   B. Ravi   C. Meera --&gt;</pre></div>
+      </div>
+      <p><span class="kbd">&lt;ul&gt;</span> has no <span class="kbd">type</span>-based numbering — it always shows bullets, and ordering the items has no visual effect (they're conceptually "not in a particular order").</p>
+
+      <h3>Text formatting: use the HTML5 tags, not the legacy ones</h3>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>Want</th><th>Legacy tag (avoid)</th><th>HTML5 tag (use this)</th></tr>
+        <tr><td>Bold</td><td class="mono">&lt;b&gt;</td><td class="mono">&lt;strong&gt;</td></tr>
+        <tr><td>Italic</td><td class="mono">&lt;i&gt;</td><td class="mono">&lt;em&gt;</td></tr>
+      </table></div>
+      <p><span class="kbd">&lt;strong&gt;</span> and <span class="kbd">&lt;em&gt;</span> render the same visually (bold/italic) but also carry <em>meaning</em> — "this text matters" / "this text is emphasized" — which screen readers and search engines pick up on. <span class="kbd">&lt;b&gt;</span> and <span class="kbd">&lt;i&gt;</span> are purely visual with no semantic meaning.</p>
+
+      <h3>Images</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;img src="flag.jpg" alt="Country flag"&gt;</pre></div>
+      <ul>
+        <li><span class="kbd">&lt;img&gt;</span> is <dfn>self-closing</dfn> (no separate closing tag needed) — unlike <span class="kbd">&lt;p&gt;</span> or <span class="kbd">&lt;b&gt;</span>, which need <span class="kbd">&lt;/p&gt;</span> / <span class="kbd">&lt;/b&gt;</span>.</li>
+        <li><span class="kbd">src</span> — the image file's location.</li>
+        <li><span class="kbd">alt</span> — fallback text shown if the image fails to load. Not optional in real projects — see below.</li>
+      </ul>
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>The video frames <span class="kbd">alt</span> text purely as a "broken image" fallback. Its bigger purpose: screen readers read <span class="kbd">alt</span> text aloud for visually impaired users, so every meaningful image needs a real, descriptive <span class="kbd">alt</span> — this is a baseline accessibility requirement, not a nice-to-have.</p>
+      </div>
+
+      <h3>Tables</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;table border="1"&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Employee ID&lt;/th&gt;
+        &lt;th&gt;Name&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;101&lt;/td&gt;
+        &lt;td&gt;Asha&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;</pre></div>
+      <p><span class="kbd">&lt;table&gt;</span> is the container, <span class="kbd">&lt;tr&gt;</span> is one table row, <span class="kbd">&lt;th&gt;</span> is a header cell (bold, centered by default), and <span class="kbd">&lt;td&gt;</span> is a normal data cell.</p>
+
+      <p>To center content inside a cell, add <span class="kbd">align="center"</span> to the <span class="kbd">&lt;th&gt;</span> or <span class="kbd">&lt;td&gt;</span>:</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;td align="center"&gt;101&lt;/td&gt;</pre></div>
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p><span class="kbd">align</span> is a presentational HTML attribute — it's old-style, like <span class="kbd">&lt;b&gt;</span>/<span class="kbd">&lt;i&gt;</span> were for bold/italic. Modern practice is to keep HTML for structure only and do alignment with CSS instead: <span class="kbd">text-align: center;</span> on the cell (covered in the CSS topic below). <span class="kbd">align</span> still works in every browser, so you'll see it in a lot of older tutorials and code, but don't reach for it in a new project.</p>
+      </div>
+
+      <h3>Tables with images</h3>
+      <p>A table cell can hold any HTML, including an <span class="kbd">&lt;img&gt;</span> — useful for something like a "country + flag" list.</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;table border="1"&gt;
+    &lt;tr&gt;
+        &lt;th&gt;#&lt;/th&gt;
+        &lt;th&gt;Country&lt;/th&gt;
+        &lt;th&gt;Flag&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td align="center"&gt;1&lt;/td&gt;
+        &lt;td align="center"&gt;India&lt;/td&gt;
+        &lt;td align="center"&gt;&lt;img src="india.jpg" alt="Flag of India"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td align="center"&gt;2&lt;/td&gt;
+        &lt;td align="center"&gt;USA&lt;/td&gt;
+        &lt;td align="center"&gt;&lt;img src="usa.png" alt="Flag of USA"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;</pre></div>
+      <p>Each <span class="kbd">&lt;img&gt;</span> just goes inside its own <span class="kbd">&lt;td&gt;</span>, exactly like it would anywhere else on the page — a table cell is just another container.</p>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled — HTML is a markup language, not a programming language</div>
+        <p>Every row above was typed out by hand. In a real Django app, table rows like these usually need to come from a database — e.g. one row per employee — and the number of rows isn't known ahead of time. You can't write a loop in plain HTML to generate rows dynamically, because HTML has no logic: no variables, no <span class="kbd">if</span>/<span class="kbd">for</span>, no classes or objects (the "OOP" concepts Django/Python have). HTML only describes structure. Repeating rows for database records is done with the <strong>Django Template Language (DTL)</strong> — e.g. <span class="kbd">{% for employee in employees %}</span> — which is covered once templates are connected to views and models.</p>
+      </div>
+
+      <h3>Hyperlinks</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;a href="https://www.djangoproject.com"&gt;Go to Django's site&lt;/a&gt;</pre></div>
+      <p><span class="kbd">&lt;a&gt;</span> is the anchor tag; <span class="kbd">href</span> (hyperlink reference) is the destination — either another page on your own site (e.g. <span class="kbd">href="index.html"</span>) or a full external URL.</p>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Use headings (<span class="kbd">h1</span>–<span class="kbd">h6</span>) in order to reflect document structure, not just for font size — skipping from <span class="kbd">h1</span> straight to <span class="kbd">h4</span> for a smaller look is a common beginner mistake that hurts accessibility and SEO. Use CSS to control size instead.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 11 ============ -->
+    <section class="topic" id="t11">
+      <div class="topic-eyebrow"><span class="session-chip">Session 6</span>Front-end foundations</div>
+      <h2 class="topic-title">11 · HTML forms</h2>
+      <p class="lede">Forms are how a web page collects input from a user — logins, registrations, search boxes — and every form is built from a <span class="kbd">&lt;form&gt;</span> wrapping one or more <span class="kbd">&lt;input&gt;</span> elements.</p>
+
+      <h3>A basic form</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;form action="index.html" method="post"&gt;
+    &lt;label for="uname"&gt;Enter name&lt;/label&gt;
+    &lt;input type="text" id="uname" name="username" placeholder="Enter name" required&gt;
+    &lt;br&gt;
+    &lt;input type="password" name="pwd"&gt;
+    &lt;br&gt;
+    &lt;input type="submit" value="Submit"&gt;
+&lt;/form&gt;</pre></div>
+
+      <h3>The pieces</h3>
+      <ul>
+        <li><span class="kbd">action</span> — where the form's data gets sent when submitted.</li>
+        <li><span class="kbd">method</span> — how it's sent (commonly <span class="kbd">post</span> for data that changes something, <span class="kbd">get</span> for simple lookups).</li>
+        <li><span class="kbd">type</span> on <span class="kbd">&lt;input&gt;</span> — controls what kind of field it is: <span class="kbd">text</span>, <span class="kbd">password</span> (hides typed characters), <span class="kbd">email</span>, <span class="kbd">checkbox</span>, <span class="kbd">radio</span>, <span class="kbd">submit</span>, and more.</li>
+        <li><span class="kbd">name</span> — the identifier used to read this field's value once the form is submitted (in JavaScript or on the server). Without a <span class="kbd">name</span>, a field's value is never sent — even if the user fills it in.</li>
+        <li><span class="kbd">value</span> — its meaning depends on the input type. For <span class="kbd">text</span>/<span class="kbd">email</span>/<span class="kbd">password</span>, it's a <em>pre-filled default</em> the user can overwrite — usually left blank so the user provides it themselves. For <span class="kbd">checkbox</span>/<span class="kbd">radio</span>/<span class="kbd">submit</span>, it's not shown to the user at all — it's the identifier sent to the server for <em>that specific option</em> when checked/clicked.</li>
+        <li><span class="kbd">placeholder</span> — greyed-out hint text shown inside an empty field; disappears once the user types.</li>
+        <li><span class="kbd">required</span> — the browser won't let the form submit until this field has a value.</li>
+        <li><span class="kbd">&lt;label for="uname"&gt;</span> — links descriptive text to the input whose <span class="kbd">id="uname"</span> matches. This isn't just cosmetic: clicking the label text focuses the input, and screen readers announce the label when the field is focused.</li>
+      </ul>
+
+      <div class="callout example">
+        <div class="callout-label">Example — grouping checkboxes and radio buttons</div>
+        <p>Giving multiple inputs the <em>same</em> <span class="kbd">name</span> groups them. For checkboxes, any number can be checked, and each checked one's <span class="kbd">value</span> is sent. For radio buttons, the shared <span class="kbd">name</span> makes them mutually exclusive — only one can be selected at a time.</p>
+        <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;p&gt;Pick your courses:&lt;/p&gt;
+&lt;input type="checkbox" id="py" name="course" value="python"&gt;
+&lt;label for="py"&gt;Python&lt;/label&gt;
+&lt;input type="checkbox" id="cs" name="course" value="csharp"&gt;
+&lt;label for="cs"&gt;C#&lt;/label&gt;
+
+&lt;p&gt;Preferred contact method:&lt;/p&gt;
+&lt;input type="radio" id="em" name="contact" value="email" checked&gt;
+&lt;label for="em"&gt;Email&lt;/label&gt;
+&lt;input type="radio" id="ph" name="contact" value="phone"&gt;
+&lt;label for="ph"&gt;Phone&lt;/label&gt;</pre></div>
+        <p>If both checkboxes are checked, the server receives <span class="kbd">course=python</span> and <span class="kbd">course=csharp</span>. For the radio group, only whichever one is selected is sent — here <span class="kbd">contact=email</span> is selected by default via the <span class="kbd">checked</span> attribute.</p>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Always pair every input with a <span class="kbd">&lt;label&gt;</span> (via matching <span class="kbd">for</span>/<span class="kbd">id</span>), not just a nearby paragraph of text — a paragraph has no programmatic connection to the field, so assistive technology can't associate the two.</p>
+      </div>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — CSRF protection</div>
+        <p>The forms here are plain HTML with no Django involved yet, so they work as shown. The moment a form like this <span class="kbd">action</span>s to a real Django view with <span class="kbd">method="post"</span>, Django's <a href="https://docs.djangoproject.com/en/stable/ref/csrf/" target="_blank" rel="noopener">CSRF protection</a> will reject the submission unless the form includes <span class="kbd">{% csrf_token %}</span> inside it. This is a security feature (prevents other sites from silently submitting forms to your app on a logged-in user's behalf) — expect a 403 Forbidden error the first time you wire a POST form into Django and forget it.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 12 ============ -->
+    <section class="topic" id="t12">
+      <div class="topic-eyebrow"><span class="session-chip">Session 7</span>Front-end foundations</div>
+      <h2 class="topic-title">12 · CSS basics &amp; the 3 ways to style</h2>
+      <p class="lede">CSS (Cascading Style Sheets) controls how HTML looks — colors, fonts, spacing, layout. There are three ways to attach CSS to a page, and only one of them is recommended for real projects.</p>
+
+      <h3>Basic syntax</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="css">selector {
+    property: value;
+    property: value;
+}
+
+<span class="c">/* example */</span>
+p {
+    color: red;
+    font-size: 25px;
+}</pre></div>
+      <p>A <dfn>selector</dfn> picks which HTML element(s) to style (here, every <span class="kbd">&lt;p&gt;</span>); everything inside the curly braces is a list of <span class="kbd">property: value;</span> pairs.</p>
+
+      <h3>The three ways to apply CSS</h3>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>Type</th><th>How</th><th>Scope</th></tr>
+        <tr><td><strong>Inline</strong></td><td class="mono">&lt;p style="color:red;"&gt;</td><td>Just that one element</td></tr>
+        <tr><td><strong>Internal</strong></td><td class="mono">&lt;style&gt;...&lt;/style&gt; in &lt;head&gt;</td><td>Just that one HTML page</td></tr>
+        <tr><td><strong>External</strong></td><td>Separate <span class="mono">.css</span> file, linked in</td><td>Every page that links to it</td></tr>
+      </table></div>
+
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html"><span class="c">&lt;!-- linking an external stylesheet --&gt;</span>
+&lt;head&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
+&lt;/head&gt;</pre></div>
+
+      <h3>Which style wins? (priority)</h3>
+      <p>If the same element gets conflicting styles from more than one place, CSS follows a clear order:</p>
+      <ol>
+        <li><strong>Inline style always wins</strong> over internal or external, no matter what.</li>
+        <li>Between internal and external: <strong>whichever one appears later</strong> (further down) in the HTML file wins. So if your <span class="kbd">&lt;link&gt;</span> to the external file appears <em>before</em> an internal <span class="kbd">&lt;style&gt;</span> block, the internal block wins (it's "later"). If the internal block is written first and the external link comes after it, the external file wins.</li>
+      </ol>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — the real rule (specificity)</div>
+        <p>The "whichever comes later wins" rule the video gives is true only when the competing rules have equal <em>specificity</em> (roughly, how precisely a selector targets an element). CSS actually resolves conflicts using a specificity score first, and only falls back to "later wins" when scores are tied. See the next topic for the full, correct version of this — including why ID and class selectors change the outcome.</p>
+      </div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>External stylesheets are what real projects use almost exclusively — one CSS file styling an entire site means a single edit updates every page. Inline styles are reserved for rare one-off overrides (or dynamic styles set by JavaScript); internal <span class="kbd">&lt;style&gt;</span> blocks are mostly avoided outside of quick demos, exactly like this video is using them for.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 13 ============ -->
+    <section class="topic" id="t13">
+      <div class="topic-eyebrow"><span class="session-chip">Session 8</span>Front-end foundations</div>
+      <h2 class="topic-title">13 · CSS selectors &amp; priority</h2>
+      <p class="lede">Selectors are how you tell CSS which elements to target. There are a few main kinds, and when more than one rule could apply to the same element, specificity decides which one wins.</p>
+
+      <h3>The main selector types</h3>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>Selector</th><th>Syntax</th><th>Targets</th></tr>
+        <tr><td>Element</td><td class="mono">p { }</td><td>Every <span class="mono">&lt;p&gt;</span> on the page</td></tr>
+        <tr><td>Class</td><td class="mono">.center { }</td><td>Any element with <span class="mono">class="center"</span></td></tr>
+        <tr><td>ID</td><td class="mono">#main { }</td><td>The one element with <span class="mono">id="main"</span> (IDs must be unique per page)</td></tr>
+        <tr><td>Universal</td><td class="mono">* { }</td><td>Every element on the page</td></tr>
+        <tr><td>Grouped</td><td class="mono">h1, h2, p { }</td><td>All listed selectors, sharing one rule block</td></tr>
+      </table></div>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="css">.center {
+    text-align: center;
+}
+
+p.center {
+    <span class="c">/* only paragraphs with class="center" — narrower than .center alone */</span>
+    color: purple;
+}</pre></div>
+
+      <h3>Specificity: the real priority rules</h3>
+      <p>The video's explanation ("ID beats class beats element") is correct as far as it goes — here's the precise version, which is what you'll find in any CSS reference:</p>
+      <div class="callout research">
+        <div class="callout-label">Researched — CSS specificity, precisely</div>
+        <p>Every selector gets a specificity score. From highest to lowest priority:</p>
+        <ol>
+          <li><strong>Inline styles</strong> — always highest (see previous topic).</li>
+          <li><strong>ID selectors</strong> (<span class="kbd">#main</span>) — very high.</li>
+          <li><strong>Class, attribute, and pseudo-class selectors</strong> (<span class="kbd">.center</span>, <span class="kbd">:hover</span>) — medium.</li>
+          <li><strong>Element and pseudo-element selectors</strong> (<span class="kbd">p</span>, <span class="kbd">::first-letter</span>) — lowest.</li>
+        </ol>
+        <p>Only when two rules have the <em>exact same</em> specificity score does "whichever is defined later wins" come into play. Full reference: <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Specificity" target="_blank" rel="noopener">MDN — CSS Specificity</a>.</p>
+      </div>
+
+      <h3>Pseudo-elements &amp; link states</h3>
+      <p><dfn>Pseudo-elements</dfn> style a specific part of an element rather than the whole thing:</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="css">p::first-letter { color: blue; }
+p::first-line   { color: red; }</pre></div>
+      <p>Links have four special states, styled with <dfn>pseudo-classes</dfn> — and their order in your CSS file matters:</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="css">a:link    { color: red; }    <span class="c">/* unvisited */</span>
+a:visited { color: green; }  <span class="c">/* already visited */</span>
+a:hover   { color: yellow; } <span class="c">/* mouse over it */</span>
+a:active  { color: blue; }   <span class="c">/* being clicked, right now */</span></pre></div>
+      <div class="code-note">Remember the order with the mnemonic <strong>LoVe HAte</strong> — Link, Visited, Hover, Active. Writing them in a different order can make <span class="kbd">:hover</span> or <span class="kbd">:active</span> silently fail to apply.</div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Prefer class selectors over ID selectors for styling in real projects. IDs have such high specificity that they become hard to override later, and since an ID must be unique per page, class-based styles are far more reusable across multiple elements.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 14 ============ -->
+    <section class="topic" id="t14">
+      <div class="topic-eyebrow"><span class="session-chip">Session 8</span>Front-end foundations</div>
+      <h2 class="topic-title">14 · Backgrounds, div/span &amp; overflow</h2>
+      <p class="lede">Three more CSS building blocks: styling background images, grouping content with div/span, and controlling what happens when content is too big for its box.</p>
+
+      <h3>Background images</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="css">body {
+    background-image: url('flag.jpg');
+    background-repeat: no-repeat;
+    background-position: right top;
+    background-attachment: fixed;
+    background-size: cover;
+}</pre></div>
+      <ul>
+        <li><span class="kbd">background-repeat: no-repeat</span> — stops the image tiling across the whole page.</li>
+        <li><span class="kbd">background-position</span> — where the image sits (e.g. <span class="kbd">right top</span>, <span class="kbd">center</span>).</li>
+        <li><span class="kbd">background-attachment: fixed</span> — the image stays in place even as the page scrolls.</li>
+        <li><span class="kbd">background-size: cover</span> — stretches the image to fill the entire element, cropping if needed.</li>
+      </ul>
+
+      <h3>&lt;div&gt; vs. &lt;span&gt;</h3>
+      <p>Both are generic containers with no visual style of their own — they exist purely to group content so you can apply CSS or JavaScript to that group.</p>
+      <ul>
+        <li><span class="kbd">&lt;div&gt;</span> — a <dfn>block-level</dfn> element (block-level means it takes up the full width available and starts on a new line). Used to group larger sections — a header, a sidebar, a card.</li>
+        <li><span class="kbd">&lt;span&gt;</span> — an <dfn>inline</dfn> element (inline means it only takes up as much width as its content, and stays in the flow of surrounding text). Used to style a small piece of text inside a sentence without breaking the line.</li>
+      </ul>
+
+      <h3>Overflow</h3>
+      <p>When content is bigger than the box you've given it (via fixed <span class="kbd">width</span>/<span class="kbd">height</span>), <span class="kbd">overflow</span> decides what happens to the extra content:</p>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>Value</th><th>Effect</th></tr>
+        <tr><td class="mono">visible</td><td>Extra content spills outside the box (the default)</td></tr>
+        <tr><td class="mono">hidden</td><td>Extra content is clipped and simply not shown</td></tr>
+        <tr><td class="mono">scroll</td><td>Scrollbars appear so the user can scroll to see the rest</td></tr>
+        <tr><td class="mono">auto</td><td>Scrollbars appear only if needed</td></tr>
+      </table></div>
+
+      <div class="callout practice">
+        <div class="callout-label">Industry best practice</div>
+        <p>Prefer <span class="kbd">overflow: auto</span> over <span class="kbd">scroll</span> in real layouts — <span class="kbd">auto</span> only shows scrollbars when content actually overflows, while <span class="kbd">scroll</span> shows them permanently even when there's nothing to scroll, which looks broken to users.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 15 ============ -->
+    <section class="topic" id="t15">
+      <div class="topic-eyebrow"><span class="session-chip">Session 9</span>Front-end foundations</div>
+      <h2 class="topic-title">15 · JavaScript basics</h2>
+      <p class="lede">JavaScript adds behavior and interactivity to a web page — things HTML and CSS alone can't do, like reacting to a click or validating a form before it's submitted.</p>
+
+      <h3>Where JavaScript code lives</h3>
+      <p>Like CSS, JavaScript can be internal (inside a <span class="kbd">&lt;script&gt;</span> tag on the page) or external (a separate <span class="kbd">.js</span> file, linked in).</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html"><span class="c">&lt;!-- internal --&gt;</span>
+&lt;script&gt;
+    console.log("Hello, Durga!");
+&lt;/script&gt;
+
+<span class="c">&lt;!-- external --&gt;</span>
+&lt;script src="script.js"&gt;&lt;/script&gt;</pre></div>
+      <div class="code-note">Convention: place <span class="kbd">&lt;script&gt;</span> tags in the <span class="kbd">&lt;head&gt;</span>, same as CSS <span class="kbd">&lt;link&gt;</span> tags — though for scripts that manipulate content on the page, placing them at the end of <span class="kbd">&lt;body&gt;</span> is also common so the HTML loads first.</div>
+
+      <h3>Displaying output — and which method to actually use</h3>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>Method</th><th>What it does</th></tr>
+        <tr><td class="mono">console.log()</td><td>Prints to the browser's developer console (not visible on the page) — the standard tool for debugging</td></tr>
+        <tr><td class="mono">alert()</td><td>Shows a popup dialog box the user must dismiss</td></tr>
+        <tr><td class="mono">document.write()</td><td>Writes directly into the page's HTML</td></tr>
+      </table></div>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>The video shows all three as roughly interchangeable options. In real code, <span class="kbd">document.write()</span> is avoided — if it runs after the page has finished loading, it wipes out the entire existing page content, which causes hard-to-debug bugs. <span class="kbd">console.log()</span> is the standard for debugging; <span class="kbd">alert()</span> is reserved for messages that genuinely need to interrupt the user.</p>
+      </div>
+
+      <h3>Variables</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="javascript">let name = "Durga";
+console.log("Your name is " + name);
+
+<span class="c">// getting input at runtime</span>
+let userName = prompt("Enter name");
+let a = Number(prompt("Enter first number"));
+let b = Number(prompt("Enter second number"));
+console.log("Sum is " + (a + b));</pre></div>
+      <p><span class="kbd">prompt()</span> is JavaScript's equivalent of Python's <span class="kbd">input()</span> — but everything it returns is always text. That's why <span class="kbd">Number(...)</span> wraps it above: without converting, <span class="kbd">"10" + "20"</span> would produce the text <span class="kbd">"1020"</span> (stuck together) instead of adding to <span class="kbd">30</span>.</p>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled — var vs. let vs. const</div>
+        <p>The video only ever declares variables with <span class="kbd">var</span>. Modern JavaScript (since 2015) prefers <span class="kbd">let</span> (for values that change) and <span class="kbd">const</span> (for values that never get reassigned). <span class="kbd">var</span> has looser, more error-prone scoping rules that <span class="kbd">let</span>/<span class="kbd">const</span> were introduced specifically to fix. Current style guides, including MDN's, recommend avoiding <span class="kbd">var</span> in new code — that's why every example on this page uses <span class="kbd">let</span> instead.</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 16 ============ -->
+    <section class="topic" id="t16">
+      <div class="topic-eyebrow"><span class="session-chip">Session 9–10</span>Front-end foundations</div>
+      <h2 class="topic-title">16 · DOM manipulation &amp; form validation</h2>
+      <p class="lede">JavaScript can reach into a loaded page and change it (DOM manipulation), and it's most commonly used in forms to catch bad input before it's ever sent to the server.</p>
+
+      <h3>What "DOM" means</h3>
+      <p>The <dfn>DOM</dfn> (Document Object Model) is the browser's live, in-memory representation of your HTML page — a structure JavaScript can read and change after the page has loaded, and the browser instantly reflects those changes on screen.</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;p id="msg"&gt;This is my first paragraph.&lt;/p&gt;
+
+&lt;script&gt;
+    document.getElementById("msg").innerHTML = "Welcome, Durga!";
+&lt;/script&gt;</pre></div>
+      <p><span class="kbd">document.getElementById("msg")</span> finds the one element whose <span class="kbd">id</span> is <span class="kbd">"msg"</span>; <span class="kbd">.innerHTML</span> is the property holding everything inside that element, which you can read or overwrite.</p>
+
+      <h3>Form validation</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;form name="myform" onsubmit="return validateForm()"&gt;
+    Name: &lt;input type="text" name="username"&gt;&lt;br&gt;
+    Password: &lt;input type="password" name="pwd"&gt;&lt;br&gt;
+    &lt;input type="submit" value="Login"&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+function validateForm() {
+    let name = document.myform.username.value;
+    let pwd  = document.myform.pwd.value;
+
+    if (name == "") {
+        alert("Name cannot be blank");
+        return false;
+    }
+    if (pwd.length < 6) {
+        alert("Password must be at least 6 characters long");
+        return false;
+    }
+    return true; <span class="c">// only now does the form actually submit</span>
+}
+&lt;/script&gt;</pre></div>
+      <p>The key mechanic: <span class="kbd">onsubmit="return validateForm()"</span>. If <span class="kbd">validateForm()</span> returns <span class="kbd">false</span>, the browser cancels the submission entirely — the form never leaves the page. If it returns <span class="kbd">true</span>, submission proceeds normally.</p>
+
+      <h3>Matching two password fields</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="javascript">function matchPwd() {
+    let p1 = document.myform.password1.value;
+    let p2 = document.myform.password2.value;
+    if (p1 != p2) {
+        alert("Passwords must be the same");
+        return false;
+    }
+    return true;
+}</pre></div>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled — this is an important limitation, not a footnote</div>
+        <p>Client-side JavaScript validation only improves the user's experience (instant feedback, no round-trip to the server for an obvious mistake). It is <strong>not</strong> a security boundary — anyone can open their browser's developer tools, disable JavaScript, or send a request directly (bypassing the form entirely) and submit whatever data they want. The video actually mentions this near the end: Django performs its own server-side validation regardless, and that server-side check is the one that actually protects your data. Treat JavaScript validation as a convenience layered on top of — never a replacement for — server-side validation (in Django, this means using Django Forms/ModelForms, covered in later sessions).</p>
+      </div>
+    </section>
+
+    <!-- ============ TOPIC 17 ============ -->
+    <section class="topic" id="t17">
+      <div class="topic-eyebrow"><span class="session-chip">Session 10</span>Front-end foundations</div>
+      <h2 class="topic-title">17 · jQuery basics</h2>
+      <p class="lede">jQuery is a JavaScript library that lets you write much shorter code for common tasks like selecting elements and handling clicks — its own slogan is "write less, do more."</p>
+
+      <h3>What it is</h3>
+      <p>A <dfn>library</dfn> is a pre-written bundle of code you can call into, instead of writing everything from scratch. jQuery specifically wraps a lot of common, repetitive JavaScript (selecting elements, showing/hiding things, handling events) into short one-line methods.</p>
+
+      <h3>Adding jQuery to a page: two ways</h3>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>Method</th><th>How</th><th>Needs internet each load?</th></tr>
+        <tr><td>Local</td><td>Download the <span class="mono">.js</span> file once, keep it in your project, link to it like any other script</td><td>No</td></tr>
+        <tr><td>CDN</td><td>Link directly to jQuery's file hosted on their servers</td><td>Yes</td></tr>
+      </table></div>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html"><span class="c">&lt;!-- Local --&gt;</span>
+&lt;script src="jquery-3.6.0.min.js"&gt;&lt;/script&gt;
+
+<span class="c">&lt;!-- CDN --&gt;</span>
+&lt;script src="https://code.jquery.com/jquery-3.6.0.min.js"&gt;&lt;/script&gt;</pre></div>
+
+      <h3>Basic syntax</h3>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="javascript">$(selector).action();
+
+<span class="c">// example: hide every paragraph when a button is clicked</span>
+$(document).ready(function() {
+    $("button").click(function() {
+        $("p").hide();
+    });
+});</pre></div>
+      <ul>
+        <li><span class="kbd">$</span> — shorthand for accessing jQuery.</li>
+        <li><span class="kbd">selector</span> — which HTML element(s) to target (same idea as CSS selectors — element, <span class="kbd">.class</span>, <span class="kbd">#id</span>).</li>
+        <li><span class="kbd">.action()</span> — what to do to them (<span class="kbd">.hide()</span>, <span class="kbd">.show()</span>, <span class="kbd">.click()</span>, etc.).</li>
+        <li><span class="kbd">$(document).ready(...)</span> — waits until the whole page has finished loading before running the code inside, so it never tries to act on an element that hasn't appeared yet.</li>
+      </ul>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — is jQuery still worth learning?</div>
+        <p>jQuery was essential a decade ago because plain JavaScript was verbose and inconsistent across browsers. Modern JavaScript has since added most of what jQuery offered directly into the language (e.g. <span class="kbd">document.querySelector()</span>, <span class="kbd">fetch()</span>), and modern browsers are far more consistent — so new projects increasingly skip jQuery entirely. It's still worth knowing because a huge number of existing/older sites (and some third-party front-end libraries) still depend on it, but for new Django projects specifically, plain JavaScript or a modern front-end approach is now more common than reaching for jQuery by default. Django itself has no dependency on jQuery at all.</p>
+      </div>
+    </section>
+
+    </div>
+
+    <footer class="end">
+      Built from video transcripts covering Django sessions 3–10 (setup through jQuery). Updated as new sessions are added.
+    </footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  var toggle = document.getElementById('navToggle');
+  var sidebar = document.getElementById('sidebar');
+  if (toggle) {
+    toggle.addEventListener('click', function () {
+      var open = document.body.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  document.addEventListener('click', function (e) {
+    if (document.body.classList.contains('nav-open') &&
+        !sidebar.contains(e.target) && e.target !== toggle) {
+      document.body.classList.remove('nav-open');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('.navlink'));
+  var sections = links
+    .map(function (l) { return document.querySelector(l.getAttribute('href')); })
+    .filter(Boolean);
+
+  links.forEach(function (l) {
+    l.addEventListener('click', function () {
+      document.body.classList.remove('nav-open');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  function setActive(id) {
+    links.forEach(function (l) {
+      l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+    });
+  }
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) setActive(entry.target.id);
+      });
+    }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+</script>
