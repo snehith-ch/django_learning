@@ -975,7 +975,7 @@ python manage.py migrate</pre></div>
 
     <!-- ============ TOPIC 10 ============ -->
     <section class="topic" id="t10">
-      <div class="topic-eyebrow"><span class="session-chip">Session 6</span>Front-end foundations</div>
+      <div class="topic-eyebrow"><span class="session-chip">Session 6–7</span>Front-end foundations</div>
       <h2 class="topic-title">10 · HTML basics</h2>
       <p class="lede">HTML (HyperText Markup Language) is the mandatory foundation of every web page — it describes <em>content and structure</em>, not styling or behavior.</p>
 
@@ -1049,6 +1049,48 @@ python manage.py migrate</pre></div>
         <tr><td>Italic</td><td class="mono">&lt;i&gt;</td><td class="mono">&lt;em&gt;</td></tr>
       </table></div>
       <p><span class="kbd">&lt;strong&gt;</span> and <span class="kbd">&lt;em&gt;</span> render the same visually (bold/italic) but also carry <em>meaning</em> — "this text matters" / "this text is emphasized" — which screen readers and search engines pick up on. <span class="kbd">&lt;b&gt;</span> and <span class="kbd">&lt;i&gt;</span> are purely visual with no semantic meaning.</p>
+
+      <h3>More text-formatting elements</h3>
+      <p>Beyond bold/italic, HTML has several other inline elements for special-meaning text:</p>
+      <div class="table-scroll"><table class="ref">
+        <tr><th>Tag</th><th>Effect</th><th>Status</th></tr>
+        <tr><td class="mono">&lt;u&gt;</td><td>Underline</td><td>Valid, but avoid — underlined text reads as a link to most users</td></tr>
+        <tr><td class="mono">&lt;sub&gt;</td><td>Subscript (small, below the baseline — e.g. H<sub>2</sub>O)</td><td>Valid</td></tr>
+        <tr><td class="mono">&lt;sup&gt;</td><td>Superscript (small, above the baseline — e.g. x<sup>2</sup>)</td><td>Valid</td></tr>
+        <tr><td class="mono">&lt;mark&gt;</td><td>Highlighted text (yellow background by default)</td><td>Valid — HTML5 semantic tag</td></tr>
+        <tr><td class="mono">&lt;small&gt;</td><td>Smaller text — fine print, side comments</td><td>Valid</td></tr>
+        <tr><td class="mono">&lt;big&gt;</td><td>Larger text</td><td>Non-standard — not part of the HTML5 spec at all</td></tr>
+        <tr><td class="mono">&lt;del&gt;</td><td>Marks text as removed (strikethrough)</td><td>Valid — semantic replacement for <span class="mono">&lt;strike&gt;</span></td></tr>
+        <tr><td class="mono">&lt;ins&gt;</td><td>Marks text as inserted (underline)</td><td>Valid</td></tr>
+        <tr><td class="mono">&lt;strike&gt;</td><td>Strikethrough</td><td>Obsolete legacy tag — use <span class="mono">&lt;del&gt;</span> or <span class="mono">&lt;s&gt;</span> instead</td></tr>
+      </table></div>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;p&gt;&lt;b&gt;Bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;strong&gt;strong&lt;/strong&gt;, &lt;em&gt;emphasized&lt;/em&gt;.&lt;/p&gt;
+&lt;h2&gt;My name is &lt;small&gt;Mohan&lt;/small&gt; and I am from &lt;ins&gt;Hyderabad&lt;/ins&gt;&lt;/h2&gt;
+&lt;p&gt;This is &lt;sub&gt;subscripted&lt;/sub&gt; and this is &lt;sup&gt;superscripted&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;Please note: &lt;mark&gt;the office is closed on Monday&lt;/mark&gt;.&lt;/p&gt;</pre></div>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled — <span class="kbd">&lt;mark&gt;</span> vs. <span class="kbd">&lt;marquee&gt;</span></div>
+        <p>These sound alike (and the video's audio makes them easy to mix up) but they're two completely different tags. <span class="kbd">&lt;mark&gt;</span>, above, just highlights text in place. <span class="kbd">&lt;marquee&gt;</span>, below, makes text scroll across the screen — a different, much older tag with a completely different purpose.</p>
+      </div>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — <span class="kbd">&lt;big&gt;</span> and <span class="kbd">&lt;strike&gt;</span></div>
+        <p>Per <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/big" target="_blank" rel="noopener">MDN</a>, <span class="kbd">&lt;big&gt;</span> was dropped from the HTML5 standard entirely (it still renders in most browsers for backward compatibility, but you should never use it in new code — use CSS <span class="kbd">font-size</span> instead). <span class="kbd">&lt;strike&gt;</span> is officially obsolete too, superseded by <span class="kbd">&lt;del&gt;</span> (semantically "removed") or <span class="kbd">&lt;s&gt;</span> (just "no longer accurate/relevant", no removal implied).</p>
+      </div>
+
+      <h3>The &lt;marquee&gt; tag — and why to avoid it</h3>
+      <p><span class="kbd">&lt;marquee&gt;</span> makes its text scroll across the page — historically used for banner-style alerts, e.g. a bank's website scrolling an important notice so it catches the customer's eye.</p>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;marquee&gt;Welcome to Durga Sir&lt;/marquee&gt;
+&lt;marquee bgcolor="red" direction="right"&gt;Welcome to Durga Sir&lt;/marquee&gt;</pre></div>
+      <ul>
+        <li><span class="kbd">bgcolor</span> — background color behind the scrolling text.</li>
+        <li><span class="kbd">direction</span> — which way it scrolls (<span class="kbd">left</span> by default, or <span class="kbd">right</span>, <span class="kbd">up</span>, <span class="kbd">down</span>).</li>
+      </ul>
+      <div class="callout research">
+        <div class="callout-label">Researched — don't use <span class="kbd">&lt;marquee&gt;</span> in real projects</div>
+        <p><span class="kbd">&lt;marquee&gt;</span> was never part of any official HTML standard — <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/marquee" target="_blank" rel="noopener">MDN marks it deprecated</a> and explicitly warns against using it, since browsers aren't required to keep supporting it. It's shown here because it still appears in a lot of tutorials and older sites, and it's useful to recognize. For a scrolling-banner effect in a real project, use a CSS animation instead — it's supported the same way everywhere and doesn't rely on a non-standard element.</p>
+      </div>
 
       <h3>Images</h3>
       <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;img src="flag.jpg" alt="Country flag"&gt;</pre></div>
@@ -1193,6 +1235,16 @@ p {
 }</pre></div>
       <p>A <dfn>selector</dfn> picks which HTML element(s) to style (here, every <span class="kbd">&lt;p&gt;</span>); everything inside the curly braces is a list of <span class="kbd">property: value;</span> pairs.</p>
 
+      <div class="callout example">
+        <div class="callout-label">Example — common properties together</div>
+        <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="css">h1 {
+    color: crimson;
+    font-family: Georgia;
+    font-size: 40px;
+}</pre></div>
+        <p><span class="kbd">font-family</span> sets the typeface (browsers fall back to a default font if the named one isn't installed — real projects usually list several as fallbacks, e.g. <span class="kbd">font-family: Georgia, serif;</span>). <span class="kbd">color</span> sets text color, <span class="kbd">font-size</span> sets text size (in pixels here).</p>
+      </div>
+
       <h3>The three ways to apply CSS</h3>
       <div class="table-scroll"><table class="ref">
         <tr><th>Type</th><th>How</th><th>Scope</th></tr>
@@ -1205,6 +1257,16 @@ p {
 &lt;head&gt;
     &lt;link rel="stylesheet" href="style.css"&gt;
 &lt;/head&gt;</pre></div>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled</div>
+        <p>Inside a Django project, an external stylesheet is created the same way as an HTML template: in the <span class="kbd">templates</span> folder, right-click → <em>New</em> → <em>Style Sheet</em>, name it with a <span class="kbd">.css</span> extension (e.g. <span class="kbd">sample.css</span>). This file should contain <em>only</em> CSS rules — no <span class="kbd">&lt;html&gt;</span>, <span class="kbd">&lt;head&gt;</span>, or <span class="kbd">&lt;body&gt;</span> tags. It can then be linked from any number of HTML pages via <span class="kbd">&lt;link&gt;</span> — changing one property in this one file updates every page that links to it.</p>
+      </div>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — the <span class="kbd">rel</span> attribute is not optional</div>
+        <p>The video calls <span class="kbd">rel="stylesheet"</span> optional. That's incorrect for linking CSS: per the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link" target="_blank" rel="noopener">HTML spec</a>, <span class="kbd">rel</span> is what tells the browser <em>how to treat</em> the linked file — without <span class="kbd">rel="stylesheet"</span>, the browser has no reason to apply the file's contents as CSS at all, and the styles silently won't load. Always include it.</p>
+      </div>
 
       <h3>Which style wins? (priority)</h3>
       <p>If the same element gets conflicting styles from more than one place, CSS follows a clear order:</p>
