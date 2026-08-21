@@ -1362,12 +1362,37 @@ a:active  { color: blue; }   <span class="c">/* being clicked, right now */</spa
         <li><span class="kbd">background-size: cover</span> — stretches the image to fill the entire element, cropping if needed.</li>
       </ul>
 
+      <div class="callout example">
+        <div class="callout-label">Example — shorthand</div>
+        <p>All five properties above can be combined into a single <span class="kbd">background</span> declaration, in the order <span class="kbd">image → repeat → position → attachment</span>:</p>
+        <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="css">body {
+    background: url('flag.jpg') no-repeat right top fixed;
+}</pre></div>
+      </div>
+
+      <div class="callout gapfill">
+        <div class="callout-label">Gap‑filled — <span class="kbd">body</span> vs. <span class="kbd">html</span> for a true full-page background</div>
+        <p>Setting the background on <span class="kbd">body</span> only covers the area the page's content actually occupies — on a short page, the color/image stops where the content ends, leaving a gap below. Setting it on <span class="kbd">html</span> instead covers the entire browser viewport, since <span class="kbd">&lt;html&gt;</span> is the outermost element and always spans the full window height. For a background that's guaranteed to fill the whole visible page, target <span class="kbd">html</span> (or set <span class="kbd">min-height: 100%</span> on <span class="kbd">body</span> as an alternative).</p>
+      </div>
+
       <h3>&lt;div&gt; vs. &lt;span&gt;</h3>
       <p>Both are generic containers with no visual style of their own — they exist purely to group content so you can apply CSS or JavaScript to that group.</p>
       <ul>
         <li><span class="kbd">&lt;div&gt;</span> — a <dfn>block-level</dfn> element (block-level means it takes up the full width available and starts on a new line). Used to group larger sections — a header, a sidebar, a card.</li>
         <li><span class="kbd">&lt;span&gt;</span> — an <dfn>inline</dfn> element (inline means it only takes up as much width as its content, and stays in the flow of surrounding text). Used to style a small piece of text inside a sentence without breaking the line.</li>
       </ul>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="html">&lt;style&gt;
+    div { color: red; background-color: lightblue; }
+    span { color: green; font-size: 20px; font-family: Georgia; }
+&lt;/style&gt;
+
+&lt;div&gt;
+    &lt;h1&gt;This is heading one&lt;/h1&gt;
+    &lt;h2&gt;This is heading two&lt;/h2&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;b&gt;Welcome to&lt;/b&gt; &lt;span&gt;Durga's class&lt;/span&gt;&lt;/p&gt;</pre></div>
+      <p>Everything inside the <span class="kbd">&lt;div&gt;</span> (both headings) gets red text on a light-blue background, and starts on its own new block. Only the word wrapped in <span class="kbd">&lt;span&gt;</span> gets its own styling — the rest of that paragraph's text flows normally around it, on the same line.</p>
 
       <h3>Overflow</h3>
       <p>When content is bigger than the box you've given it (via fixed <span class="kbd">width</span>/<span class="kbd">height</span>), <span class="kbd">overflow</span> decides what happens to the extra content:</p>
@@ -1378,6 +1403,18 @@ a:active  { color: blue; }   <span class="c">/* being clicked, right now */</spa
         <tr><td class="mono">scroll</td><td>Scrollbars appear so the user can scroll to see the rest</td></tr>
         <tr><td class="mono">auto</td><td>Scrollbars appear only if needed</td></tr>
       </table></div>
+      <div class="code-wrap code-wrap-scroll"><pre class="code" data-lang="css">p {
+    height: 200px;
+    width: 400px;
+    border: 3px solid red;
+    overflow: scroll;
+}</pre></div>
+      <p>Here the paragraph's box is fixed at 400×200 pixels. If the text inside is longer than that box, <span class="kbd">overflow: scroll</span> keeps it readable by adding scrollbars, rather than letting it spill past the red border (<span class="kbd">visible</span>) or silently cutting it off (<span class="kbd">hidden</span>).</p>
+
+      <div class="callout research">
+        <div class="callout-label">Researched — centering content isn't just "align"</div>
+        <p>The video reaches for a generic "align" property to center content inside a box and finds it doesn't work directly — that's expected. <span class="kbd">text-align: center</span> centers inline content (text, images) <em>horizontally</em> within its container. <span class="kbd">align-content</span>/<span class="kbd">align-items</span> only have an effect inside a <span class="kbd">display: flex</span> or <span class="kbd">display: grid</span> container — applying them to an ordinary block element (like a plain <span class="kbd">&lt;div&gt;</span> or <span class="kbd">&lt;p&gt;</span>) does nothing, which is exactly the confusion in the video. To center a block element itself (not just its content) horizontally, the standard approach is <span class="kbd">margin: 0 auto;</span> with a fixed <span class="kbd">width</span>.</p>
+      </div>
 
       <div class="callout practice">
         <div class="callout-label">Industry best practice</div>
